@@ -1,19 +1,20 @@
-import { MagnifyingGlass } from 'react-loader-spinner';
-import css from './Loader.module.css';
+import { ColorRing } from 'react-loader-spinner';
 
-export function Loader() {
-  return (
-    <div className={css.loader}>
-      <MagnifyingGlass
+export const Loader = () => {
+    return (
+      <ColorRing
         visible={true}
         height="80"
         width="80"
-        ariaLabel="MagnifyingGlass-loading"
-        wrapperStyle={{}}
-        wrapperClass="MagnifyingGlass-wrapper"
-        glassColor="#c0efff"
-        color="#e15b64"
+        ariaLabel="blocks-loading"
+        wrapperStyle={{
+          display: 'block',
+          marginTop: 20,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+        wrapperClass="blocks-wrapper"
+        colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']}
       />
-    </div>
-  );
+    );
 }
