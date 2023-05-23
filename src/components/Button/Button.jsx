@@ -1,25 +1,9 @@
-import PropTypes from 'prop-types';
-import React from 'react';
 import css from './Button.module.css';
 
-export function Button({ showLoadMoreButton, pictures, handleLoadMore }) {
-  if (pictures.length !== 0) {
-    showLoadMoreButton = true;
-  }
-
+export const Button = ({ clickLoad }) => {
   return (
-    <>
-      {showLoadMoreButton ? (
-        <button type="button" className={css.button} onClick={handleLoadMore}>
-          Load more
-        </button>
-      ) : null}
-    </>
+    <button onClick={clickLoad} className={css.Button} type="button">
+      Load more
+    </button>
   );
-}
-
-Button.propTypes = {
-  showLoadMoreButton: PropTypes.bool.isRequired,
-  pictures: PropTypes.array.isRequired,
-  handleLoadMore: PropTypes.func.isRequired,
 };

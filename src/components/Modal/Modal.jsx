@@ -1,39 +1,36 @@
-import PropTypes from 'prop-types';
-import { useEffect } from 'react';
-import css from './Modal.module.css';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom'; 
+import css from './Modal.module.css'; 
 
-export function Modal({ onClick, selectedPicture }) {
-  useEffect(() => {
-    const handleKeyDown = event => {
-      if (event.key === 'Escape') {
-        onClick();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClick]);
-
-  const handleCloseClick = event => {
-    if (event.target === event.currentTarget) {
-      onClick();
+export const Modal = ({ closeModal, children }) => {
+  const handleClose = (e) => {
+    if (e.currentTarget === e.target) {
+      closeModal();
     }
   };
 
-  return (
-    <div className={css.overlay} onClick={handleCloseClick}>
-      <div className={css.modal}>
-        <img src={selectedPicture.largeImageURL} alt={selectedPicture.tags} />
-      </div>
-    </div>
-  );
-}
+  useEffect(() => {
+    const keyDown = (e) => {
+      if (e.code === 'Escape') {
+        closeModal();
+      }
+    };
 
-Modal.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  selectedPicture: PropTypes.shape({
-    largeImageURL: PropTypes.string.isRequired,
-    tags: PropTypes.string.isRequired,
-  }).isRequired,
+    const handleKeyDown = (e) => keyDown(e);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [closeModal]);
+
+  return createPortal(
+    <div onClick={handleClose} className={css.Overlay}>
+      <div className={css.Modal}>{children}</div>
+    </div>,
+    document.querySelector('#modal-root')
+  );
 };
+
+
+

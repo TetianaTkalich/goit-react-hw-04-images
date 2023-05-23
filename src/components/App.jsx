@@ -1,69 +1,104 @@
-import { useState } from 'react';
-import Searchbar from './Searchbar/Searchbar';
-import css from './App.module.css';
-import { Button } from './Button/Button';
+import React, { useState, useEffect } from 'react';
+import { Toaster } from 'react-hot-toast'; 
 import { ImageGallery } from './ImageGallery/ImageGallery';
-import { Modal } from './Modal/Modal';
+import { getSearch } from 'Api/getSearch'; 
+import { Searchbar } from './Searchbar/Searchbar'; 
+import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
-import { getPictures } from 'services/api';
+import { Modal } from './Modal/Modal';
 
-export default function App() {
-  const [pictureName, setPictureName] = useState('');
-  const [pictures, setPictures] = useState([]);
-  const [showLoadMoreButton, setShowLoadMoreButton] = useState(false);
+export const App = () => {
+  const [search, setSearch] = useState('');
+  const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedPicture, setSelectedPicture] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [total, setTotal] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [largeImageURL, setLargeImageURL] = useState('');
+  const [alt, setAlt] = useState('');
+  const [empty, setEmpty] = useState(false);
 
-  const handleFormSubmit = async pictureName => {
-    setIsLoading(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
 
-    const pictures = await getPictures(pictureName, 1);
+      try {
+        const resp = await getSearch(search, page);
+        const data = await resp.json();
 
-    setPictures(pictures.hits);
-    setPictureName(pictureName);
+        if (data.hits.length === 0) {
+          setEmpty(true);
+        }
+
+        setImages((prevImages) => [...prevImages, ...data.hits]);
+        setTotal(data.total);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (search !== '' || page !== 1) {
+      fetchData();
+    }}, [search, page]);
+
+  const handleLoadMore = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  const handleOpenModal = (largeImageURL, alt) => {
+    setShowModal(true);
+    setLargeImageURL(largeImageURL);
+    setAlt(alt);
+  };
+
+  const handleSubmit = (search) => {
+    setSearch(search);
+    setImages([]);
     setPage(1);
-    setIsLoading(false);
-  };
-
-  const handleLoadMore = async () => {
-    setIsLoading(true);
-
-    const nextPage = page + 1;
-    const newPictures = await getPictures(pictureName, nextPage);
-
-    setPictures([...pictures, ...newPictures.hits]);
-    setPage(nextPage);
-    setShowLoadMoreButton(
-      newPictures.total > pictures.length + newPictures.hits.length
-    );
-    setIsLoading(false);
-  };
-
-  const handleOpenModal = picture => {
-    setSelectedPicture(picture);
-    setIsModalOpen(true);
+    setTotal(1);
+    setLoading(false);
+    setError(null);
+    setEmpty(false);
   };
 
   const handleCloseModal = () => {
-    setSelectedPicture(null);
-    setIsModalOpen(false);
+    setShowModal(false);
   };
 
   return (
-    <div className={css.app}>
-      <Searchbar onSubmitForm={handleFormSubmit} />
-      <ImageGallery pictures={pictures} onClick={handleOpenModal} />
-      {isModalOpen && (
-        <Modal onClick={handleCloseModal} selectedPicture={selectedPicture} />
-      )}
-      {isLoading && <Loader />}
-      <Button
-        showLoadMoreButton={showLoadMoreButton}
-        pictures={pictures}
-        handleLoadMore={handleLoadMore}
+    <div>
+      <Toaster
+        toastOptions={{
+          duration: 1500,
+        }}
       />
+
+      <Searchbar handleSubmit={handleSubmit} />
+
+      {error && (
+        <h2 style={{ textAlign: 'center' }}>Something went wrong: ({error})!</h2>
+      )}
+
+      <ImageGallery toggleModal={handleOpenModal} images={images} />
+
+      {loading && <Loader />}
+
+      {empty && (
+        <h2 style={{ textAlign: 'center' }}>Sorry. There are no images ... 😭</h2>
+      )}
+
+      {total / 12 > page && <Button clickLoad={handleLoadMore} />}
+
+      {showModal && (
+        <Modal closeModal={handleCloseModal}>
+          <img src={largeImageURL} alt={alt} />
+        </Modal>
+      )}
     </div>
   );
-}
+};
+
+

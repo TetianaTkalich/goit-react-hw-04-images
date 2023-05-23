@@ -1,26 +1,24 @@
-import PropTypes from 'prop-types';
-import css from './ImageGalleryItem.module.css';
+import css from './ImageGalleryItem.module.css'; 
+import PropTypes from 'prop-types'; 
 
-export function ImageGalleryItem({ picture, onClick }) {
-  const handleClick = () => {
-    onClick(picture);
-  };
-
+export const ImageGalleryItem = ({ images, toggleModal }) => {
   return (
-    <div className={css.imageGalleryItem} onClick={handleClick}>
-      <img
-        src={picture.webformatURL}
-        alt={picture.tags}
-        className={css.imageGalleryItemImage}
-      />
-    </div>
+    <>
+        {images.map(item => (
+
+          <li key={item.id} onClick={(e)=>{toggleModal(item.largeImageURL, item.tags);}} className={css.galleryItem}>
+          <img
+            loading="lazy"
+            className={css.ImageGalleryItem}
+            src={item.webformatURL}
+            alt={item.tags}
+          />
+        </li>
+      ))}
+    </>
   );
-}
+};
 
 ImageGalleryItem.propTypes = {
-  picture: PropTypes.shape({
-    webformatURL: PropTypes.string.isRequired,
-    tags: PropTypes.string.isRequired,
-  }).isRequired,
-  onClick: PropTypes.func.isRequired,
+  images: PropTypes.arrayOf(PropTypes.object).isRequired, 
 };
