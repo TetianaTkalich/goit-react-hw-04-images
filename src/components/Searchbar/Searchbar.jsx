@@ -16,7 +16,7 @@ export const Searchbar = ({ handleSubmit }) => {
     setSearch('');
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = (e) => {npm 
     e.preventDefault();
 
    if (!search) {
